@@ -12,10 +12,6 @@ export function LocalStore() {
         store.set('SERVICE_ACCOUNT', value);
     });
 
-    ipcMain.handle(`store-delete[SERVICE_ACCOUNT]`, async (event, value) => {
-        store.delete('SERVICE_ACCOUNT');
-    });
-
     ipcMain.handle(`store-delete[GCP_ACCOUNT_CONFIGURATION]`, async (event) => {
         store.delete('SERVICE_ACCOUNT');
     });

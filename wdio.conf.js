@@ -19,7 +19,7 @@ exports.config = {
     waitforTimeout: 10000,
     connectionRetryTimeout: 120000,
     connectionRetryCount: 3,
-    services: ['vite','electron'],
+    services: ['electron'],
     framework: 'mocha',
     reporters: ['spec'],
     mochaOpts: {

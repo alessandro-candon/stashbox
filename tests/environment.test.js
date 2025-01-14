@@ -1,3 +1,5 @@
+import Store from "electron-store";
+
 describe('Electron Store Set/Get Tests', () => {
     it('should set and get a value from the store', async () => {
         // Set a value in the Electron store
