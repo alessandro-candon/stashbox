@@ -1,10 +1,16 @@
-import {app, BrowserWindow} from 'electron';
-import path from 'node:path';
-import started from 'electron-squirrel-startup';
-import {GcpBucket} from "./main/gcp/bucket";
-import {LocalFilesystem} from "./main/local/filesystem";
-import {LocalStore} from "./main/local/store";
+// Import dependencies using CommonJS require
+const { app, BrowserWindow } = require('electron');
+const path = require('path');
+const started = require('electron-squirrel-startup');
 
+// Import custom modules
+const { GcpBucket } = require('./main/gcp/bucket');  // Ensure correct path
+const { LocalFilesystem } = require('./main/local/filesystem');  // Ensure correct path
+const { LocalStore } = require('./main/local/store');  // Ensure correct path
+
+// Set environment variables directly in the main.js file
+process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL = 'http://localhost:3000'; 
+process.env.MAIN_WINDOW_VITE_NAME = 'dist';  
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (started) {
@@ -21,24 +27,26 @@ const createWindow = () => {
     },
   });
 
-  // and load the index.html of the app.
-  if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
+  // Use the environment variables in your code
+  const viteDevServerUrl = process.env.MAIN_WINDOW_VITE_DEV_SERVER_URL;
+  const viteName = process.env.MAIN_WINDOW_VITE_NAME;
+
+  if (viteDevServerUrl) {
+    mainWindow.loadURL(viteDevServerUrl);
   } else {
-    mainWindow.loadFile(path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`));
+    mainWindow.loadFile(path.join(__dirname, `../renderer/${viteName}/index.html`));
   }
 
-  // Open the DevTools.
+  // Open DevTools (optional)
   mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
-// Some APIs can only be used after this event occurs.
 app.whenReady().then(() => {
   createWindow();
 
-  // On OS X it's common to re-create a window in the app when the
+  // On macOS it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
@@ -56,6 +64,11 @@ app.on('window-all-closed', () => {
   }
 });
 
-GcpBucket();
-LocalFilesystem();
-LocalStore();
+// Call your custom modules (ensure these are correctly imported and used)
+try {
+  GcpBucket();       // Initialize GCP Bucket-related operations
+  LocalFilesystem(); // Initialize local filesystem operations
+  LocalStore();      // Initialize local store operations
+} catch (err) {
+  console.error('Error initializing custom modules:', err);
+}

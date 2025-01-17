@@ -1,10 +1,10 @@
-import fs from "fs";
-import {ipcMain} from "electron";
-import path from "node:path";
+const fs = require('fs');
+const { ipcMain } = require("electron");
+const path = require("node:path");
 
-export function LocalFilesystem() {
+function LocalFilesystem() {
     ipcMain.handle('read-dir', async (event, dirPath, skipHiddenFiles = true) => {
-        const files = fs.readdirSync(dirPath, {withFileTypes: true});
+        const files = fs.readdirSync(dirPath, { withFileTypes: true });
         return files.map(file => {
             const filePath = path.join(dirPath, file.name);
             const stats = fs.statSync(filePath);
@@ -18,9 +18,12 @@ export function LocalFilesystem() {
                 isSelected: false
             };
         })
-            .filter(file => !skipHiddenFiles || !file.name.startsWith('.'))
-            .sort((a, b) => {
+        .filter(file => !skipHiddenFiles || !file.name.startsWith('.'))
+        .sort((a, b) => {
             return a.name.localeCompare(b.name)
         });
     })
 }
+
+// Use module.exports to export the function
+module.exports = { LocalFilesystem };
