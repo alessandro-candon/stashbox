@@ -44,10 +44,10 @@ async function bucketListFiles(path) {
 }
 
 async function createFolder(path) {
-    // download the file FILES_INFO_NAME, if not exists create it empty
-    // add the new folder to the file with this informations {name: path, type: 'folder', size: 0, contentType: 'folder', updated: new Date()}
-    // upload the file FILES_INFO_NAME in the root of the storage
     const bucketName = getBucketName(serviceAccount);
+    // todo : is not implemented
+    console.error('Not implemented yet');
+    return bucketName;
 }
 
 export function GcpBucket() {
@@ -57,26 +57,10 @@ export function GcpBucket() {
     ipcMain.handle('bucket-exists', async (event, data) => {
         return await bucketExists(data);
     });
-
     ipcMain.handle('bucket-list-files', async (event, path) => {
         return await bucketListFiles(path);
     });
-
-    // ipcMain.handle('bucket-get-folder-content', async (event, path) => {
-    //     const storage = new Storage({
-    //         credentials: parsedServiceAccount
-    //     });
-    //     const bucketName = getBucketName(serviceAccount);
-    //     const filePath = '.file-content.sb';
-    //     const file = storage.bucket(bucketName).file(filePath);
-    //     const contents = (await file.download()).toString('utf-8');
-    //     console.log(contents)
-    //     if (!contents && contents.length === 0) {
-    //         return [];
-    //     }
-    //     return contents.split('\n').filter(line => line.trim() !== '').map(line => JSON.parse(line));
-    // });
-
     ipcMain.handle('bucket-create-folder', async (event, path) => {
+        return await createFolder(path);
     });
 }

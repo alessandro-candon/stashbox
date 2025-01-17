@@ -1,5 +1,3 @@
-import { bucketCreate } from '../../../src/main/gcp/bucket';
-import {store} from "../../../src/main/local/store";
 
 test('Check bucket create', () => {
     process.env['FAKE_GCP_SERVER_ENDPOINT'] = 'https://0.0.0.0:4443/';
