@@ -2,8 +2,8 @@ import fs from "fs";
 import {ipcMain} from "electron";
 import path from "node:path";
 
-export function LocalFilesystem() {
-    ipcMain.handle('read-dir', async (event, dirPath, skipHiddenFiles = true) => {
+export const localFilesystem = {
+    local_read_dir: (event, dirPath, skipHiddenFiles = true) => {
         const files = fs.readdirSync(dirPath, {withFileTypes: true});
         return files.map(file => {
             const filePath = path.join(dirPath, file.name);
@@ -17,10 +17,8 @@ export function LocalFilesystem() {
                 isHighlighted: false,
                 isSelected: false
             };
-        })
-            .filter(file => !skipHiddenFiles || !file.name.startsWith('.'))
-            .sort((a, b) => {
-            return a.name.localeCompare(b.name)
-        });
-    })
+        }).filter(file => !skipHiddenFiles || !file.name.startsWith('.')).sort((a, b) => {
+                return a.name.localeCompare(b.name)
+            });
+    }
 }
