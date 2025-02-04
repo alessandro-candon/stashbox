@@ -28,7 +28,7 @@
     "@wdio/mocha-framework": "^9.5.0",
     "@wdio/spec-reporter": "^9.5.0",
     "electron": "33.3.1",
-    "vite": "^5.0.12",
+    "vite": "^5.4.14",
     "wdio-vite-service": "^2.0.0"
   },
   "keywords": [],
