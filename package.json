@@ -9,7 +9,10 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
+    "lint": "echo \"No linting configured\"",
+    "test": "vitest",
+    "test:watch": "vitest watch",
+    "test:run": "vitest run"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.6.0",
