@@ -37,7 +37,8 @@ const onSubmit = async () => {
       classType: classRef.value.value
     };
     await window.api.invoke('store-save[SERVICE_ACCOUNT]', serviceAccount.value);
-    const isStorageExists = await window.api.invoke('bucket-exists', data)
+    await window.api.invoke('bucket_store_setup');
+    const isStorageExists = await window.api.invoke('bucket_exists', data)
     if (isStorageExists) {
       $q.notify({
         message: 'Storage already exists',
@@ -45,7 +46,7 @@ const onSubmit = async () => {
         position: 'top'
       })
     } else {
-      await window.api.invoke('bucket-create', data)
+      await window.api.invoke('bucket_create', data)
       $q.notify({
         message: 'Storage created successfully',
         color: 'positive',

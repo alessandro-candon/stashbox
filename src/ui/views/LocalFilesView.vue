@@ -13,7 +13,7 @@ const openFileOptionModalRef = ref(false)
 const rightClickedFileRef = ref()
 
 const loadFiles = () => {
-  window.api.invoke('read-dir', currentRoute.value).then((data) => {
+  window.api.invoke('local_read_dir', currentRoute.value).then((data) => {
     files.value = data;
   });
 }

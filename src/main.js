@@ -1,9 +1,9 @@
-import {app, BrowserWindow} from 'electron';
+import {app, BrowserWindow, ipcMain} from 'electron';
 import path from 'node:path';
 import started from 'electron-squirrel-startup';
-import {GcpBucket} from "./main/gcp/bucket";
-import {LocalFilesystem} from "./main/local/filesystem";
-import {LocalStore} from "./main/local/store";
+import {gcpBucket, GcpBucket} from "./main/gcp/bucket";
+import {localFilesystem, LocalFilesystem} from "./main/local/filesystem";
+import {localStore, LocalStore} from "./main/local/store";
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -56,6 +56,14 @@ app.on('window-all-closed', () => {
   }
 });
 
-GcpBucket();
-LocalFilesystem();
-LocalStore();
+const exportedFunctions = {
+  ...gcpBucket,
+  ...localFilesystem,
+  ...localStore
+}
+for (const k of Object.keys(exportedFunctions)) {
+  ipcMain.handle(k, (...args) => {
+    console.log('ipcMain.handle', k, args);
+    return exportedFunctions[k](...args);
+  })
+}

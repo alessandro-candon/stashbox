@@ -1,66 +1,57 @@
 import {Storage} from "@google-cloud/storage";
-import {ipcMain} from "electron";
 import {store} from "../local/store";
-
 
 const getBucketName = (serviceAccount) => {
     const parsedServiceAccount = JSON.parse(serviceAccount);
-    return parsedServiceAccount.project_id || 'my-fake-project' + '-bucket-1';
+    return (parsedServiceAccount.project_id || 'my-fake-project') + '-storage-1';
 }
-const FILES_INFO_NAME = 'files-info.sb';
-const serviceAccount = store.get('SERVICE_ACCOUNT');
-const parsedServiceAccount = JSON.parse(serviceAccount);
-const storage = new Storage({
-    credentials: parsedServiceAccount,
-    projectId: parsedServiceAccount.project_id,
-    apiEndpoint: process.env.FAKE_GCP_SERVER_ENDPOINT || undefined
-});
+let serviceAccount = store.get('SERVICE_ACCOUNT');
 
-async function bucketCreate(data) {
-    const {locationType, location, classType} = data;
-    await storage.createBucket(getBucketName(serviceAccount), {
-        location: location,
-        [classType]: true,
-    });
+const setupStorage = (serviceAccount) => {
+    if (serviceAccount !== undefined) {
+        return new Storage({
+            credentials: JSON.parse(serviceAccount),
+            projectId: JSON.parse(serviceAccount).project_id,
+            apiEndpoint: process.env.FAKE_GCP_SERVER_ENDPOINT || undefined
+        });
+    }
 }
+let storage = setupStorage(serviceAccount);
 
-async function bucketExists() {
-    const [buckets] = await storage.getBuckets();
-    const bucketSearched = buckets.find(bucket => bucket.name === getBucketName(serviceAccount));
-    return !!bucketSearched;
-}
-
-async function bucketListFiles(path) {
-    const bucketName = getBucketName(serviceAccount);
-    const [files] = await storage.bucket(bucketName).getFiles({
-        prefix: path
-    });
-    return files.map(file => ({
-        name: file.name,
-        size: file.metadata.size,
-        contentType: file.metadata.contentType,
-        updated: file.metadata.updated,
-    })).filter(file => !file.name.endsWith('.sb'));
-}
-
-async function createFolder(path) {
-    const bucketName = getBucketName(serviceAccount);
-    // todo : is not implemented
-    console.error('Not implemented yet');
-    return bucketName;
-}
-
-export function GcpBucket() {
-    ipcMain.handle('bucket-create', async (event, data) => {
-        await bucketCreate(data);
-    })
-    ipcMain.handle('bucket-exists', async (event, data) => {
-        return await bucketExists(data);
-    });
-    ipcMain.handle('bucket-list-files', async (event, path) => {
-        return await bucketListFiles(path);
-    });
-    ipcMain.handle('bucket-create-folder', async (event, path) => {
-        return await createFolder(path);
-    });
+export const gcpBucket =  {
+    bucket_store_setup: async function (event) {
+        serviceAccount = store.get('SERVICE_ACCOUNT');
+        storage = setupStorage(serviceAccount);
+    },
+    bucket_exists: async function () {
+        const [buckets] = await storage.getBuckets();
+        const bucketSearched = buckets.find(bucket => bucket.name === getBucketName(serviceAccount));
+        return !!bucketSearched;
+    },
+    bucket_list_files: async function (event, path) {
+        const bucketName = getBucketName(serviceAccount);
+        const [files] = await storage.bucket(bucketName).getFiles({
+            prefix: path
+        });
+        return files.map(file => ({
+            name: file.name,
+            size: file.metadata.size,
+            contentType: file.metadata.contentType,
+            updated: file.metadata.updated,
+        })).filter(file => !file.name.endsWith('.sb'));
+    },
+    bucket_create_folder: async function createFolder(path) {
+        const bucketName = getBucketName(serviceAccount);
+        // todo : is not implemented
+        console.error('Not implemented yet');
+        return bucketName;
+    },
+    bucket_create: async function bucketCreate(event, data) {
+        console.log('>>>>', data);
+        const { location, classType} = data;
+        await storage.createBucket(getBucketName(serviceAccount), {
+            location: location.toUpperCase(),
+            [classType.toUpperCase()]: true,
+        });
+    }
 }

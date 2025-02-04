@@ -11,13 +11,9 @@ const commandPressedRef = ref(false);
 const currentRoute = ref('/')
 const rightClickedFileRef = ref()
 const loadFiles = () => {
-  window.api.invoke('bucket-list-files', '').then((data) => {
+  window.api.invoke('bucket_list_files', '').then((data) => {
     console.log(data);
   });
-
-  // window.api.invoke('bucket-get-folder-content', '').then((data) => {
-  //   console.log(data);
-  // });
 }
 
 const onCreateFolder = () => {

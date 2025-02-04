@@ -1,9 +1,12 @@
 <script setup>
 import {QLayout, QHeader, QToolbar, QToolbarTitle, QAvatar, QTabs, QRouteTab, QPageContainer, QSpace, QBtn} from "quasar";
 import router from "../router";
+import {useSetupStore} from "../stores/setup-store";
+const setupStore = useSetupStore();
 
 const onLogout = async () => {
   await window.api.invoke('store-delete-all')
+  setupStore.resetAll()
 }
 </script>
 

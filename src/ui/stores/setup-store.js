@@ -15,8 +15,6 @@ export const useSetupStore = defineStore('setup', () => {
         clientEmail.value = decodedServiceAccount.client_email;
     }
     function getBucketConfig() {
-        console.log('clientId', clientId.value);
-        console.log('clientEmail', clientEmail.value);
         return {
             clientId: clientId.value,
             clientEmail: clientEmail.value
@@ -25,7 +23,12 @@ export const useSetupStore = defineStore('setup', () => {
     function isSetupDone() {
         return clientId.value && clientEmail.value;
     }
+    function resetAll() {
+        clientId.value = null;
+        clientEmail.value = null;
+    }
     return {
+        resetAll,
         getBucketConfig,
         setBucketConfigWithServiceAccount,
         setBucketConfig,
