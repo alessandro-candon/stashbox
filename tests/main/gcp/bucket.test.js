@@ -25,18 +25,28 @@ describe('gcpBucket', () => {
         vi.restoreAllMocks()
     });
 
-
     it('exists: should return false, bucket not exists', async () => {
         const exists = await gcpBucket.bucket_exists();
         expect(exists).toBe(false);
     });
 
     it('exists: should return true, bucket is created', async () => {
-        await gcpBucket.bucket_create({
+        await gcpBucket.bucket_create({}, {
             location: 'europe-west8',
             classType: 'standard'
         });
         const exists = await gcpBucket.bucket_exists();
         expect(exists).toBe(true);
+        gcpBucket.bucket_delete();
+    });
+
+    it('should create a folder and the file in folder', async () => {
+        await gcpBucket.bucket_create({}, {
+            location: 'europe-west8',
+            classType: 'standard'
+        });
+        await gcpBucket.bucket_create_folder('/test/folder/');
+        const files = await gcpBucket.bucket_list_files({}, '/', 'all');
+        console.log(files);
     });
 });

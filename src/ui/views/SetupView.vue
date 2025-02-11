@@ -54,6 +54,7 @@ const onSubmit = async () => {
       })
     }
     setupStore.setBucketConfigWithServiceAccount(serviceAccount.value)
+    await window.api.invoke('store-save[GCP_ACCOUNT_CONFIGURATION]', setupStore.getBucketConfig());
     await router.push({
       name: 'local-files',
       force: true,

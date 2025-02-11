@@ -63,7 +63,7 @@ const exportedFunctions = {
 }
 for (const k of Object.keys(exportedFunctions)) {
   ipcMain.handle(k, (...args) => {
-    console.log('ipcMain.handle', k, args);
+    console.log('ipcMain.handle', k);
     return exportedFunctions[k](...args);
   })
 }

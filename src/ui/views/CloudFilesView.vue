@@ -1,30 +1,56 @@
 <script setup>
-import {QPageSticky, QFab, QFabAction} from "quasar";
-import {onMounted, onUnmounted, ref} from "vue";
+import {QPageSticky, QFab, QFabAction, QBreadcrumbs, QBreadcrumbsEl} from "quasar";
+import {onMounted, onUnmounted, ref, watch} from "vue";
 import FileComponent from "../components/FileComponent.vue";
 import {useQuasar} from "quasar";
+import CreateFolderModal from "../components/CreateFolderModal.vue";
 
 const $q = useQuasar();
 
 const files = ref([]);
 const commandPressedRef = ref(false);
-const currentRoute = ref('/')
+const currentRoute = ref('')
 const rightClickedFileRef = ref()
+const onCreateFolderModalRef = ref(false)
+
 const loadFiles = () => {
-  window.api.invoke('bucket_list_files', '').then((data) => {
-    console.log(data);
+  console.log(currentRoute.value)
+  window.api.invoke('bucket_list_folders', currentRoute.value).then((cloudFolders) => {
+    console.log('cloudFolders',cloudFolders)
+    files.value = cloudFolders;
+    window.api.invoke('bucket_list_files', currentRoute.value).then((cloudFiles) => {
+      console.log('cloudFiles',cloudFiles)
+      files.value = files.value.concat(cloudFiles);
+    });
   });
 }
 
+const getBreadcrumbs = () => {
+  const parts = currentRoute.value.split('/').filter(Boolean);
+  return parts.map((part, index) => {
+    return {
+      name: part,
+      path: parts.slice(0, index + 1).join('/')
+    };
+  });
+}
 const onCreateFolder = () => {
-  window.api.invoke('bucket-create-folder', '/').then((data) => {
+  onCreateFolderModalRef.value = true;
+}
 
+const onSaveFolder = (folderName) => {
+  console.log('folderName', folderName)
+  onCreateFolderModalRef.value = false;
+  window.api.invoke('bucket_create_folder',currentRoute.value,folderName).then(() => {
+    loadFiles();
   });
 }
 
 const onFileDoubleClick = (file) => {
   if (file.isDirectory) {
-    console.log('open folder of cloud')
+    currentRoute.value = currentRoute.value === '' ? file.name : currentRoute.value + '/' + file.name;
+    console.log('currentRoute',currentRoute.value)
+    loadFiles();
   } else {
     $q.notify({
       message: 'File clicked: ' + file.name,
@@ -71,11 +97,26 @@ onUnmounted(() => {
   window.removeEventListener('keyup', handleKeyUp);
 });
 
+watch(currentRoute, () => {
+  loadFiles();
+});
+
 loadFiles()
+
 </script>
 
 <template>
-
+  <div class="q-pl-md q-pt-lg">
+    <q-breadcrumbs>
+      <q-breadcrumbs-el icon="home" @click="currentRoute = ''"/>
+      <q-breadcrumbs-el
+          v-for="(breadcrumb, index) in getBreadcrumbs()"
+          :key="index"
+          :label="breadcrumb.name"
+          @click="currentRoute = breadcrumb.path"
+      />
+    </q-breadcrumbs>
+  </div>
   <div class="q-pa-md">
     <div class="q-gutter-x-md row">
       <div v-for="(file,index) in files" :key="index">
@@ -91,9 +132,11 @@ loadFiles()
 
   <q-page-sticky position="bottom-right" :offset="[18, 18]">
     <q-fab icon="expand_less" direction="up" color="accent">
-      <q-fab-action @click="onCreateFolder" color="positive" icon="settings_applications" />
+      <q-fab-action @click="onCreateFolder" color="positive" icon="add" />
     </q-fab>
   </q-page-sticky>
+
+  <CreateFolderModal v-model="onCreateFolderModalRef" @save-success="onSaveFolder"></CreateFolderModal>
 </template>
 
 <style scoped>

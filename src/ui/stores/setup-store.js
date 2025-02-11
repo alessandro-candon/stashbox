@@ -6,6 +6,9 @@ export const useSetupStore = defineStore('setup', () => {
     const clientEmail = ref(null);
 
     function setBucketConfig(data) {
+        if (!data.clientId || !data.clientEmail) {
+            console.error('Invalid data for configuration of bucket', data);
+        }
         clientId.value = data.clientId;
         clientEmail.value = data.clientEmail
     }

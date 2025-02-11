@@ -26,8 +26,8 @@
     "@electron/fuses": "^1.8.0",
     "@vitejs/plugin-vue": "^5.2.1",
     "electron": "33.3.1",
-    "vitest": "^3.0.5",
-    "vite": "^5.4.14"
+    "vite": "^5.4.14",
+    "vitest": "^3.0.5"
   },
   "keywords": [],
   "author": {
@@ -37,6 +37,7 @@
   "license": "MIT",
   "dependencies": {
     "@google-cloud/storage": "^7.14.0",
+    "@google-cloud/storage-control": "^0.2.0",
     "@quasar/extras": "^1.16.15",
     "electron-squirrel-startup": "^1.0.1",
     "electron-store": "^10.0.0",
