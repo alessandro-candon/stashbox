@@ -50,7 +50,6 @@ const onFileClick = (file) => {
 }
 
 const onRightClick = (file) => {
-  console.log(file)
   rightClickedFileRef.value = file;
   openFileOptionModalRef.value = true;
 }

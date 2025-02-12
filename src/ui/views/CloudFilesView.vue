@@ -7,22 +7,49 @@ import CreateFolderModal from "../components/CreateFolderModal.vue";
 
 const $q = useQuasar();
 
-const files = ref([]);
+const filesRef = ref([]);
 const commandPressedRef = ref(false);
 const currentRoute = ref('')
 const rightClickedFileRef = ref()
 const onCreateFolderModalRef = ref(false)
+let cloudFolderNextPage = {};
+let cloudFilesNextPage = {};
 
-const loadFiles = () => {
-  console.log(currentRoute.value)
-  window.api.invoke('bucket_list_folders', currentRoute.value).then((cloudFolders) => {
+const loadFiles = async () => {
+  if (cloudFilesNextPage !== null) {
+    const [cloudFiles, cloudFilesNextPageRequest] = await window.api.invoke(
+        'bucket_list_files',
+        currentRoute.value,
+        cloudFilesNextPage
+    );
+    console.log('cloudFiles',cloudFiles)
+    cloudFilesNextPage = cloudFilesNextPageRequest;
+    filesRef.value = filesRef.value.concat(cloudFiles).sort((a, b) => a.name.localeCompare(b.name));
+  }
+}
+
+const loadFolders = async () => {
+  if (cloudFolderNextPage !== null) {
+    const [cloudFolders, cloudFolderNextPageRequest] = await window.api.invoke(
+        'bucket_list_folders',
+        currentRoute.value,
+        cloudFolderNextPage
+    );
     console.log('cloudFolders',cloudFolders)
-    files.value = cloudFolders;
-    window.api.invoke('bucket_list_files', currentRoute.value).then((cloudFiles) => {
-      console.log('cloudFiles',cloudFiles)
-      files.value = files.value.concat(cloudFiles);
-    });
-  });
+    cloudFolderNextPage = cloudFolderNextPageRequest;
+    filesRef.value = filesRef.value.concat(cloudFolders).sort((a, b) => a.name.localeCompare(b.name));
+  }
+}
+
+const loadContent = async () => {
+  await loadFolders();
+  await loadFiles();
+}
+
+const resetContent = () => {
+  cloudFolderNextPage = {};
+  cloudFilesNextPage = {};
+  filesRef.value = [];
 }
 
 const getBreadcrumbs = () => {
@@ -42,15 +69,14 @@ const onSaveFolder = (folderName) => {
   console.log('folderName', folderName)
   onCreateFolderModalRef.value = false;
   window.api.invoke('bucket_create_folder',currentRoute.value,folderName).then(() => {
-    loadFiles();
+    resetContent();
+    loadContent();
   });
 }
 
 const onFileDoubleClick = (file) => {
   if (file.isDirectory) {
     currentRoute.value = currentRoute.value === '' ? file.name : currentRoute.value + '/' + file.name;
-    console.log('currentRoute',currentRoute.value)
-    loadFiles();
   } else {
     $q.notify({
       message: 'File clicked: ' + file.name,
@@ -65,7 +91,7 @@ const onFileClick = (file) => {
     file.isHighlighted = !file.isHighlighted;
   } else {
     const fileOldValue = file.isHighlighted;
-    files.value.map((f) => f.isHighlighted = false);
+    filesRef.value.map((f) => f.isHighlighted = false);
     file.isHighlighted = !fileOldValue;
   }
 }
@@ -98,10 +124,12 @@ onUnmounted(() => {
 });
 
 watch(currentRoute, () => {
-  loadFiles();
+  resetContent();
+  loadContent();
 });
 
-loadFiles()
+
+loadContent();
 
 </script>
 
@@ -119,7 +147,7 @@ loadFiles()
   </div>
   <div class="q-pa-md">
     <div class="q-gutter-x-md row">
-      <div v-for="(file,index) in files" :key="index">
+      <div v-for="(file,index) in filesRef" :key="index">
         <FileComponent
             :file="file"
             @double-click="onFileDoubleClick"

@@ -17,8 +17,7 @@ export const localFilesystem = {
                 isHighlighted: false,
                 isSelected: false
             };
-        }).filter(file => !skipHiddenFiles || !file.name.startsWith('.')).sort((a, b) => {
-                return a.name.localeCompare(b.name)
-            });
+        }).filter(file => !skipHiddenFiles || !file.name.startsWith('.'))
+            .sort((a, b) => a.name.localeCompare(b.name));
     }
 }
